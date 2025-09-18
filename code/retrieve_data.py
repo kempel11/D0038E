@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
+from sklearn import preprocessing
 
 # Create columns and import data
 data_colums = ['day', 'month', 'year', 'Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI', 'Classes', 'Region']
@@ -14,7 +16,45 @@ data_set["Region"] = data_set["Region"].map({"Bejaia": 1, "Sidi-Bel Abbes": 0})
 data_set["month"] = pd.to_datetime(data_set[["year","month","day"]]).dt.month
 
 # Remove data that isnt needed
-data_set.drop['Classes']
+#data_set.drop['Classes']
+
+# minimum and maximum allowed values 
+min_max_values = {
+    "Temperature": (22, 42),
+    "RH": (21,90),
+    "Ws": (6,29),
+    "Rain":(0,16.8),
+    "FFMC":(28.6,92.5),
+    "DMC":(1.1,65.9),
+    "DC":(7,220.4),
+    "ISI":(0,18.5),
+    "BUI":(1.1,68),
+    "FWI":(0,31.1)
+}
+
+# prints out current values and their limits
+def check_max_min_values():
+    data_to_check = ['Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC','ISI','BUI','FWI']
+    for a in data_to_check:
+        print(a)
+        print("Curr min", min(data_set[a]) ,"min:", min_max_values[a][0]) 
+        print("Curr max", max(data_set[a]) ,"max:", min_max_values[a][1], '\n')
+
+#check_max_min_values()
+
+# Transforms data to be inside given ranges
+def normalize():
+    data_to_check = ['Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC','ISI','BUI','FWI']
+    for a in data_to_check:
+        #print(a)
+        #print("Curr min", min(data_set[a]) ,"min:", min_max_values[a][0]) 
+        #print("Curr max", max(data_set[a]) ,"max:", min_max_values[a][1], '\n')
+        minmax=preprocessing.MinMaxScaler(feature_range=(min_max_values[a][0],min_max_values[a][1]))
+        data_set[a] = minmax.fit_transform(data_set[[a]])
+        #print("Norm min", min(data_set[a]) ,"min:", min_max_values[a][0]) 
+        #print("Norm max", max(data_set[a]) ,"max:", min_max_values[a][1], '\n')
+
+normalize()
 
 # Generates histograms of the given columms
 def generate_histogram(column):
@@ -28,7 +68,7 @@ def generate_histogram(column):
         plt.savefig("figure/"+c+"_histogram.png", dpi=300, bbox_inches="tight")
         plt.close()
 
-generate_histogram(['Region','Fire', 'Temperature' ,'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI'])
+#generate_histogram(['Region','Fire', 'Temperature' ,'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI'])
 
 # Plot temperature over time
 def temp_over_time():
@@ -40,9 +80,10 @@ def temp_over_time():
     plt.legend()
     plt.grid(True)
     plt.savefig("temperature_plot.png", dpi=300, bbox_inches="tight")
+    #plt.show()
     plt.close()
 
-temp_over_time()
+#temp_over_time()
 
 #Heatmap
 def heatmap():
@@ -53,7 +94,7 @@ def heatmap():
     plt.savefig("heatmap.png", dpi=300, bbox_inches="tight")
     plt.close()
 
-heatmap()
+#heatmap()
 
 #Scatterplot Temp/RH
 def scatterplot_temp_RH():
@@ -63,4 +104,4 @@ def scatterplot_temp_RH():
     plt.savefig("scatterplot.png", dpi=300, bbox_inches="tight")
     plt.close()
 
-scatterplot_temp_RH()
+#scatterplot_temp_RH()
