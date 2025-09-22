@@ -17,8 +17,8 @@ data_set["Fire"] = data_set["Classes"].map({"fire": 1, "not fire": 0})
 data_set["Region"] = data_set["Region"].map({"Bejaia": 1, "Sidi-Bel Abbes": 0})
 data_set["month"] = pd.to_datetime(data_set[["year","month","day"]]).dt.month
 
-# Remove data that isnt needed
-#data_set.drop['Classes']
+# Remove unused data
+data_set.drop(['Classes','year'], axis=1, inplace=True)
 
 # K-means
 features = ["Temperature", "RH", "Ws", "Rain", "FFMC", "DMC", "DC", "ISI", "BUI", "FWI", "Fire"]
