@@ -155,7 +155,7 @@ def boxplot_fnof():
     plt.ylabel("Relative Humidity (%)")
     plt.savefig("boxplot_hum.png", dpi=300, bbox_inches="tight")
     plt.close()
-boxplot_fnof()
+#boxplot_fnof()
 
 # FWI Distribution plot
 def displot_FWI():
@@ -166,4 +166,4 @@ def displot_FWI():
     plt.ylabel("Density")
     plt.savefig("displot_FWI.png", dpi=300, bbox_inches="tight")
     plt.close()
-displot_FWI()
+#displot_FWI()
