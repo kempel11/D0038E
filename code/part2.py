@@ -9,6 +9,9 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
 import plot_generator
 import table_generator
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 RANDOM = 1
 
@@ -68,7 +71,7 @@ def split_data():
 #print(test_data['Fire'].describe(), "\n")
 
 def train_decision_tree():
-    clf = tree.DecisionTreeClassifier(random_state=RANDOM)
+    clf = tree.DecisionTreeClassifier(random_state=42)
     clf.fit(train_data,train_label)
 
     predict = clf.predict(test_data)
@@ -84,3 +87,51 @@ normalize_min_max_scaler()
 train_data, train_label, vali_data, vali_label, test_data, test_label = split_data()
 
 train_decision_tree()
+
+
+def train_SVM():
+    clf = SVC(random_state = 42)
+    clf.fit(train_data, train_label)
+
+    predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+
+    table_generator.classification_report_table(report, "SVM")
+    table_generator.confusion_table(matrix, "SVM")
+    plot_generator.display_confusion_matrix(matrix, "SVM")
+
+train_SVM()
+
+
+def train_random_forest():
+    clf = RandomForestClassifier(n_estimators=10, random_state = 42, oob_score=True)
+    clf.fit(train_data, train_label)
+
+    predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+
+    table_generator.classification_report_table(report, "Random Forest")
+    table_generator.confusion_table(matrix, "Random Forest")
+    plot_generator.display_confusion_matrix(matrix, "Random Forest")
+
+train_random_forest()
+
+
+def train_knn():
+    clf = KNeighborsClassifier(n_neighbors = 42)
+    clf.fit(train_data, train_label)
+
+    predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+
+    table_generator.classification_report_table(report, "kNN")
+    table_generator.confusion_table(matrix, "kNN")
+    plot_generator.display_confusion_matrix(matrix, "kNN")
+
+train_knn()
