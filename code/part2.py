@@ -1,11 +1,14 @@
 import pandas as pd
 import numpy as np
+import seaborn as sns
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn import tree
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
+import plot_generator
+import table_generator
 
 RANDOM = 1
 
@@ -69,21 +72,13 @@ def train_decision_tree():
     clf.fit(train_data,train_label)
 
     predict = clf.predict(test_data)
-    #accuracy = accuracy_score(test_label, predict)
-    #f1 = f1_score()
-    #print("Accuracy:", accuracy)
 
-def train_random_forest():
-    print("Random Forest")
-
-def train_k_nn():
-    print("k-NN")
-
-def train_mlp():
-    print("k-MLP")
-
-def train_svm():
-    print("SVM")
+    report = classification_report(test_label,predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+    
+    table_generator.classification_report_table(report, "decision tree")
+    table_generator.confusion_table(matrix, "decision tree")
+    plot_generator.display_confusion_matrix(matrix, "decision_tree")
 
 normalize_min_max_scaler()
 train_data, train_label, vali_data, vali_label, test_data, test_label = split_data()
