@@ -7,8 +7,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
 # Create columns and import data
-data_colums = ['day', 'month', 'year', 'Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI', 'Classes', 'Region']
-data_set = pd.read_csv("data/Algerian_forest_fires_dataset_FIXED.csv",sep=";",header=0, names=data_colums)
+def getData():
+    data_colums = ['day', 'month', 'year', 'Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI', 'Classes', 'Region']
+    data_set = pd.read_csv("data/Algerian_forest_fires_dataset_FIXED.csv",sep=";",header=0, names=data_colums)
+    return data_set
+
+data_set = getData()
 
 # Create a datetime column
 data_set["date"] = pd.to_datetime(data_set[["year", "month", "day"]])
