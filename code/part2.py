@@ -7,10 +7,11 @@ from sklearn import tree
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import accuracy_score, classification_report, f1_score, confusion_matrix
+from sklearn.neural_network import MLPClassifier
 import plot_generator
 import table_generator
 from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
 RANDOM = 1
@@ -62,14 +63,6 @@ def split_data():
 
     return train_data,train_label, vali_data,vali_label, test_data,test_label
 
-#print(train_data.describe(), "\n")
-#print(vali_data.describe(), "\n")
-#print(test_data.describe(), "\n")
-
-#print(train_data['Fire'].describe(), "\n")
-#print(vali_data['Fire'].describe(), "\n")
-#print(test_data['Fire'].describe(), "\n")
-
 def train_decision_tree():
     clf = tree.DecisionTreeClassifier(random_state=42)
     clf.fit(train_data,train_label)
@@ -83,10 +76,12 @@ def train_decision_tree():
     table_generator.confusion_table(matrix, "decision tree")
     plot_generator.display_confusion_matrix(matrix, "decision_tree")
 
+    return report, matrix
+
 normalize_min_max_scaler()
 train_data, train_label, vali_data, vali_label, test_data, test_label = split_data()
 
-train_decision_tree()
+report_decision_tree, matrix_decision_tree = train_decision_tree()
 
 
 def train_SVM():
@@ -102,7 +97,9 @@ def train_SVM():
     table_generator.confusion_table(matrix, "SVM")
     plot_generator.display_confusion_matrix(matrix, "SVM")
 
-train_SVM()
+    return report,matrix
+
+report_svm, matrix_svm = train_SVM()
 
 
 def train_random_forest():
@@ -118,7 +115,9 @@ def train_random_forest():
     table_generator.confusion_table(matrix, "Random Forest")
     plot_generator.display_confusion_matrix(matrix, "Random Forest")
 
-train_random_forest()
+    return report, matrix
+
+report_random_forest, matrix_random_forest = train_random_forest()
 
 
 def train_knn():
@@ -134,4 +133,48 @@ def train_knn():
     table_generator.confusion_table(matrix, "kNN")
     plot_generator.display_confusion_matrix(matrix, "kNN")
 
-train_knn()
+    return report, matrix
+
+def train_mlp():
+    #Probably change some parameters
+    clf = MLPClassifier(random_state=RANDOM)
+    clf.fit(train_data, train_label)
+
+    predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+
+    table_generator.classification_report_table(report, "MLP")
+    table_generator.confusion_table(matrix, "MLP")
+    plot_generator.display_confusion_matrix(matrix, "MLP")
+
+    return report, matrix
+
+report_mlp, matrix_mlp = train_mlp()
+
+def train_ada_boost():
+    #Probably change some parameters
+    clf = AdaBoostClassifier(random_state=RANDOM)
+    clf.fit(train_data, train_label)
+
+    predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+
+    table_generator.classification_report_table(report, "AdaBoost")
+    table_generator.confusion_table(matrix, "AdaBoost")
+    plot_generator.display_confusion_matrix(matrix, "AdaBoost")
+
+    return report, matrix
+
+report_ada, matrix_ada = train_ada_boost()
+
+
+report_knn, matrix_knn = train_knn()
+reports = [report_decision_tree, report_svm, report_random_forest, report_knn, report_mlp, report_ada]
+names = ["Decision Tree", "SVM", "Random Forest", "k-NN", "MLP", "AdaBoost"]
+plot_generator.accuracy_comparison(reports, names)
+plot_generator.f1_score_comparison(reports, names)
+
