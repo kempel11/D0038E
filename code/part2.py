@@ -11,10 +11,12 @@ from sklearn.neural_network import MLPClassifier
 import plot_generator
 import table_generator
 from sklearn.svm import SVC
-from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
 RANDOM = 1
+
+table_generator.prep()
 
 data_colums = ['day', 'month', 'year', 'Temperature', 'RH', 'Ws', 'Rain', 'FFMC', 'DMC', 'DC', 'ISI', 'BUI', 'FWI', 'Classes', 'Region']
 raw_data = pd.read_csv("data/Algerian_forest_fires_dataset_FIXED.csv",sep=";",header=0, names=data_colums)
@@ -48,7 +50,7 @@ def normalize_min_max_scaler():
 
 # Split data into 70,15,15 
 # Stratify is used so there is an close to equal ammount of fire/not fire in each dataset
-def split_data():
+def split_data_70_15():
     train_data, temp_data = train_test_split(raw_data, train_size=0.7, random_state=RANDOM, stratify=raw_data['Fire'])
     vali_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=RANDOM, stratify=temp_data['Fire'])
 
@@ -62,6 +64,18 @@ def split_data():
     test_data = test_data.drop(['Fire'], axis=1)
 
     return train_data,train_label, vali_data,vali_label, test_data,test_label
+
+def split_data_70_30():
+    train_data, test_data = train_test_split(raw_data, train_size=0.7, random_state=RANDOM, stratify=raw_data['Fire'])
+
+    # Seperate label from data
+    train_label = train_data['Fire'].copy()
+    test_label = test_data['Fire'].copy()
+
+    train_data = train_data.drop(['Fire'], axis=1)
+    test_data = test_data.drop(['Fire'], axis=1)
+
+    return train_data,train_label, test_data,test_label
 
 def train_decision_tree():
     clf = tree.DecisionTreeClassifier(random_state=42)
@@ -79,7 +93,9 @@ def train_decision_tree():
     return report, matrix
 
 normalize_min_max_scaler()
-train_data, train_label, vali_data, vali_label, test_data, test_label = split_data()
+
+train_data, train_label, vali_data, vali_label, test_data, test_label = split_data_70_15()
+#train_data, train_label, test_data, test_label = split_data_70_30()
 
 report_decision_tree, matrix_decision_tree = train_decision_tree()
 
@@ -137,7 +153,7 @@ def train_knn():
 
 def train_mlp():
     #Probably change some parameters
-    clf = MLPClassifier(random_state=RANDOM)
+    clf = MLPClassifier(max_iter=1000, random_state=RANDOM)
     clf.fit(train_data, train_label)
 
     predict = clf.predict(test_data)
@@ -171,10 +187,28 @@ def train_ada_boost():
 
 report_ada, matrix_ada = train_ada_boost()
 
+def train_gradient_boost():
+    #Probably change some parameters
+    clf = GradientBoostingClassifier(random_state=RANDOM)
+    clf.fit(train_data, train_label)
+
+    predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
+
+    table_generator.classification_report_table(report, "Gradient Boost")
+    table_generator.confusion_table(matrix, "Gradient Boost")
+    plot_generator.display_confusion_matrix(matrix, "Gradient Boost")
+
+    return report, matrix
+
+report_gradient, matrix_gradient = train_gradient_boost()
+
 
 report_knn, matrix_knn = train_knn()
-reports = [report_decision_tree, report_svm, report_random_forest, report_knn, report_mlp, report_ada]
-names = ["Decision Tree", "SVM", "Random Forest", "k-NN", "MLP", "AdaBoost"]
+reports = [report_decision_tree, report_svm, report_random_forest, report_knn, report_mlp, report_ada, report_gradient]
+names = ["Decision Tree", "SVM", "Random Forest", "k-NN", "MLP", "AdaBoost", "Gradient Boost"]
 plot_generator.accuracy_comparison(reports, names)
 plot_generator.f1_score_comparison(reports, names)
 

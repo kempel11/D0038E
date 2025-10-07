@@ -22,9 +22,9 @@ def accuracy_comparison(reports,names):
     accuracy = []
     for i in range(len(reports)):
         accuracy.append(reports[i]['accuracy'])
-
     plot = plt.bar(names, accuracy, color="#01385e")
     plt.bar_label(plot, fmt='{:,.3f}')
+    plt.xticks(rotation=45)
     plt.title("Accuracy")
     plt.savefig("figure/comparison/accuracy_bar_chart.png", dpi=300, bbox_inches="tight")
     #plt.show()
@@ -37,6 +37,7 @@ def f1_score_comparison(reports,names):
 
     plot = plt.bar(names, f1, color="#01385e")
     plt.bar_label(plot, fmt='{:,.3f}')
+    plt.xticks(rotation=45)
     plt.title("F1-Score") 
     plt.savefig("figure/comparison/f1_score_bar_chart.png", dpi=300, bbox_inches="tight")
     #plt.show()
