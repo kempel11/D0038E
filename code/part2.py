@@ -14,7 +14,7 @@ from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 
-RANDOM = 1
+RANDOM = 42
 
 table_generator.prep()
 
@@ -78,7 +78,7 @@ def split_data_70_30():
     return train_data,train_label, test_data,test_label
 
 def train_decision_tree():
-    clf = tree.DecisionTreeClassifier(random_state=42)
+    clf = tree.DecisionTreeClassifier(random_state=RANDOM)
     clf.fit(train_data,train_label)
 
     predict = clf.predict(test_data)
@@ -94,8 +94,8 @@ def train_decision_tree():
 
 normalize_min_max_scaler()
 
-train_data, train_label, vali_data, vali_label, test_data, test_label = split_data_70_15()
-#train_data, train_label, test_data, test_label = split_data_70_30()
+#train_data, train_label, vali_data, vali_label, test_data, test_label = split_data_70_15()
+train_data, train_label, test_data, test_label = split_data_70_30()
 
 report_decision_tree, matrix_decision_tree = train_decision_tree()
 
@@ -119,7 +119,7 @@ report_svm, matrix_svm = train_SVM()
 
 
 def train_random_forest():
-    clf = RandomForestClassifier(n_estimators=10, random_state = 42, oob_score=True)
+    clf = RandomForestClassifier(n_estimators=10, random_state = RANDOM, oob_score=True)
     clf.fit(train_data, train_label)
 
     predict = clf.predict(test_data)

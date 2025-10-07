@@ -4,10 +4,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[16],[0],
-    [Not Fire],[1],[20],
+    [Not Fire],[29],[3],
+    [Fire],[0],[42],
   ),
   caption: [Confusion matrix for decision tree.]
 )
@@ -19,10 +19,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[15],[1],
-    [Not Fire],[2],[19],
+    [Not Fire],[26],[6],
+    [Fire],[4],[38],
   ),
   caption: [Confusion matrix for SVM.]
 )
@@ -34,10 +34,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[15],[1],
-    [Not Fire],[0],[21],
+    [Not Fire],[31],[1],
+    [Fire],[0],[42],
   ),
   caption: [Confusion matrix for Random Forest.]
 )
@@ -49,10 +49,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[15],[1],
-    [Not Fire],[1],[20],
+    [Not Fire],[28],[4],
+    [Fire],[6],[36],
   ),
   caption: [Confusion matrix for MLP.]
 )
@@ -64,10 +64,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[16],[0],
-    [Not Fire],[1],[20],
+    [Not Fire],[30],[2],
+    [Fire],[1],[41],
   ),
   caption: [Confusion matrix for AdaBoost.]
 )
@@ -79,10 +79,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[15],[1],
-    [Not Fire],[1],[20],
+    [Not Fire],[30],[2],
+    [Fire],[0],[42],
   ),
   caption: [Confusion matrix for Gradient Boost.]
 )
@@ -94,10 +94,10 @@
     columns: 3,
     align:center,
     table.header(
-      [],[Fire],[Not Fire]
+      [],[Not Fire],[Fire]
     ),
-    [Fire],[14],[2],
-    [Not Fire],[2],[19],
+    [Not Fire],[27],[5],
+    [Fire],[6],[36],
   ),
   caption: [Confusion matrix for kNN.]
 )
