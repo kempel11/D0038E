@@ -21,8 +21,8 @@
     table.header(
       [],[Not Fire],[Fire]
     ),
-    [Not Fire],[26],[6],
-    [Fire],[4],[38],
+    [Not Fire],[31],[1],
+    [Fire],[2],[40],
   ),
   caption: [Confusion matrix for SVM.]
 )
@@ -51,8 +51,8 @@
     table.header(
       [],[Not Fire],[Fire]
     ),
-    [Not Fire],[28],[4],
-    [Fire],[6],[36],
+    [Not Fire],[29],[3],
+    [Fire],[2],[40],
   ),
   caption: [Confusion matrix for MLP.]
 )
@@ -81,7 +81,7 @@
     table.header(
       [],[Not Fire],[Fire]
     ),
-    [Not Fire],[30],[2],
+    [Not Fire],[31],[1],
     [Fire],[0],[42],
   ),
   caption: [Confusion matrix for Gradient Boost.]
@@ -96,8 +96,8 @@
     table.header(
       [],[Not Fire],[Fire]
     ),
-    [Not Fire],[27],[5],
-    [Fire],[6],[36],
+    [Not Fire],[26],[6],
+    [Fire],[4],[38],
   ),
   caption: [Confusion matrix for kNN.]
 )

@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import RFECV
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn import tree
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
@@ -28,7 +29,6 @@ raw_data["Region"] = raw_data["Region"].map({"Bejaia": 1, "Sidi-Bel Abbes": 0})
 # Remove unused data
 raw_data.drop(['Classes','year'], axis=1, inplace=True)
 
-
 MIN_MAX_VALUES = {
     "Temperature": (22, 42),
     "RH": (21,90),
@@ -48,23 +48,8 @@ def normalize_min_max_scaler():
         minmax=preprocessing.MinMaxScaler(feature_range=(MIN_MAX_VALUES[a][0],MIN_MAX_VALUES[a][1]))
         raw_data[a] = minmax.fit_transform(raw_data[[a]])
 
-# Split data into 70,15,15 
+# Split data into 70,30
 # Stratify is used so there is an close to equal ammount of fire/not fire in each dataset
-def split_data_70_15():
-    train_data, temp_data = train_test_split(raw_data, train_size=0.7, random_state=RANDOM, stratify=raw_data['Fire'])
-    vali_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=RANDOM, stratify=temp_data['Fire'])
-
-    # Seperate label from data
-    train_label = train_data['Fire'].copy()
-    vali_label = vali_data['Fire'].copy()
-    test_label = test_data['Fire'].copy()
-
-    train_data = train_data.drop(['Fire'], axis=1)
-    vali_data = vali_data.drop(['Fire'], axis=1)
-    test_data = test_data.drop(['Fire'], axis=1)
-
-    return train_data,train_label, vali_data,vali_label, test_data,test_label
-
 def split_data_70_30():
     train_data, test_data = train_test_split(raw_data, train_size=0.7, random_state=RANDOM, stratify=raw_data['Fire'])
 
@@ -72,6 +57,7 @@ def split_data_70_30():
     train_label = train_data['Fire'].copy()
     test_label = test_data['Fire'].copy()
 
+    # Drop label from data
     train_data = train_data.drop(['Fire'], axis=1)
     test_data = test_data.drop(['Fire'], axis=1)
 
@@ -79,9 +65,17 @@ def split_data_70_30():
 
 def train_decision_tree():
     clf = tree.DecisionTreeClassifier(random_state=RANDOM)
-    clf.fit(train_data,train_label)
+    params = {
+        'criterion':['gini', 'entropy', 'log_loss'],
+        'splitter':['best','random'],
+        'max_features':['sqrt','log2',None]
+    }
+    grid_search = GridSearchCV(estimator=clf, param_grid=params, scoring='recall', verbose=1)
+    grid_search.fit(train_data, train_label)
 
-    predict = clf.predict(test_data)
+    final_model = grid_search.best_estimator_
+    print(grid_search.best_params_)
+    predict =  final_model.predict(test_data)
 
     report = classification_report(test_label,predict, target_names=['Not Fire','Fire'], output_dict=True)
     matrix = confusion_matrix(test_label,predict)
@@ -92,19 +86,19 @@ def train_decision_tree():
 
     return report, matrix
 
-normalize_min_max_scaler()
-
-#train_data, train_label, vali_data, vali_label, test_data, test_label = split_data_70_15()
-train_data, train_label, test_data, test_label = split_data_70_30()
-
-report_decision_tree, matrix_decision_tree = train_decision_tree()
-
-
 def train_SVM():
-    clf = SVC(random_state = 42)
-    clf.fit(train_data, train_label)
+    clf = SVC(random_state = RANDOM)
+    params = {
+        'kernel':['linear', 'poly', 'rbf', 'sigmoid'],
+        'gamma':['scale'],
+        'decision_function_shape':['ovo','ovr'],
+    }
+    grid_search = GridSearchCV(estimator=clf, param_grid=params, scoring='recall', verbose=1)
+    grid_search.fit(train_data, train_label)
 
-    predict = clf.predict(test_data)
+    final_model = grid_search.best_estimator_
+    print(grid_search.best_params_)
+    predict =  final_model.predict(test_data)
 
     report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
     matrix = confusion_matrix(test_label,predict)
@@ -115,14 +109,14 @@ def train_SVM():
 
     return report,matrix
 
-report_svm, matrix_svm = train_SVM()
-
-
 def train_random_forest():
     clf = RandomForestClassifier(n_estimators=10, random_state = RANDOM, oob_score=True)
     clf.fit(train_data, train_label)
 
     predict = clf.predict(test_data)
+
+    report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
+    matrix = confusion_matrix(test_label,predict)
 
     report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
     matrix = confusion_matrix(test_label,predict)
@@ -133,14 +127,18 @@ def train_random_forest():
 
     return report, matrix
 
-report_random_forest, matrix_random_forest = train_random_forest()
-
-
 def train_knn():
     clf = KNeighborsClassifier(n_neighbors = 42)
-    clf.fit(train_data, train_label)
+    params = {
+        'algorithm':['auto', 'ball_tree', 'kd_tree', 'brute'],
+        'weights':['uniform','distance',None]
+    }
+    grid_search = GridSearchCV(estimator=clf, param_grid=params, scoring='recall', verbose=1)
+    grid_search.fit(train_data, train_label)
 
-    predict = clf.predict(test_data)
+    final_model = grid_search.best_estimator_
+    print(grid_search.best_params_)
+    predict =  final_model.predict(test_data)
 
     report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
     matrix = confusion_matrix(test_label,predict)
@@ -152,11 +150,17 @@ def train_knn():
     return report, matrix
 
 def train_mlp():
-    #Probably change some parameters
-    clf = MLPClassifier(max_iter=1000, random_state=RANDOM)
-    clf.fit(train_data, train_label)
+    clf = MLPClassifier(max_iter=2000, random_state=RANDOM)
+    params = {
+        'activation':['identity', 'logistic', 'tanh', 'relu'],
+        'solver':['lbfgs','sgd','adam'],
+    }
+    grid_search = GridSearchCV(estimator=clf, param_grid=params, scoring='recall', verbose=1)
+    grid_search.fit(train_data, train_label)
 
-    predict = clf.predict(test_data)
+    final_model = grid_search.best_estimator_
+    print(grid_search.best_params_)
+    predict =  final_model.predict(test_data)
 
     report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
     matrix = confusion_matrix(test_label,predict)
@@ -167,10 +171,7 @@ def train_mlp():
 
     return report, matrix
 
-report_mlp, matrix_mlp = train_mlp()
-
 def train_ada_boost():
-    #Probably change some parameters
     clf = AdaBoostClassifier(random_state=RANDOM)
     clf.fit(train_data, train_label)
 
@@ -185,14 +186,19 @@ def train_ada_boost():
 
     return report, matrix
 
-report_ada, matrix_ada = train_ada_boost()
-
 def train_gradient_boost():
-    #Probably change some parameters
     clf = GradientBoostingClassifier(random_state=RANDOM)
-    clf.fit(train_data, train_label)
+    params = {
+        'loss':['log_loss', 'exponential'],
+        'criterion':['friedman_mse','squared_error'],
+        'max_features':['sqrt', 'log2', None]
+    }
+    grid_search = GridSearchCV(estimator=clf, param_grid=params, scoring='recall', verbose=1)
+    grid_search.fit(train_data, train_label)
 
-    predict = clf.predict(test_data)
+    final_model = grid_search.best_estimator_
+    print(grid_search.best_params_)
+    predict =  final_model.predict(test_data)
 
     report = classification_report(test_label, predict, target_names=['Not Fire','Fire'], output_dict=True)
     matrix = confusion_matrix(test_label,predict)
@@ -203,12 +209,24 @@ def train_gradient_boost():
 
     return report, matrix
 
+def evaluation_plots():
+    reports = [report_decision_tree, report_svm, report_random_forest, report_knn, report_mlp, report_ada, report_gradient]
+    names = ["Decision Tree", "SVM", "Random Forest", "k-NN", "MLP", "AdaBoost", "Gradient Boost"]
+    plot_generator.accuracy_comparison(reports, names)
+    plot_generator.f1_score_comparison(reports, names)
+    plot_generator.recall_score_comparison(reports, names)
+
+normalize_min_max_scaler()
+train_data, train_label, test_data, test_label = split_data_70_30()
+
+report_decision_tree, matrix_decision_tree = train_decision_tree()
+report_svm, matrix_svm = train_SVM()
+report_random_forest, matrix_random_forest = train_random_forest()
+report_mlp, matrix_mlp = train_mlp()
+report_ada, matrix_ada = train_ada_boost()
 report_gradient, matrix_gradient = train_gradient_boost()
-
-
 report_knn, matrix_knn = train_knn()
-reports = [report_decision_tree, report_svm, report_random_forest, report_knn, report_mlp, report_ada, report_gradient]
-names = ["Decision Tree", "SVM", "Random Forest", "k-NN", "MLP", "AdaBoost", "Gradient Boost"]
-plot_generator.accuracy_comparison(reports, names)
-plot_generator.f1_score_comparison(reports, names)
 
+evaluation_plots()
+
+print("Done")
